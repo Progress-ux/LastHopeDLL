@@ -1,0 +1,11 @@
+ReGameDLL_CS/
+lib/
+metamod-p/
+
+*.o
+*.so
+*.dll 
+
+.cache/
+
+compile_commands.json
