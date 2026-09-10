@@ -35,7 +35,7 @@ void OnCheckWinConditions(
     regame::IHookChain<void>* chain
 )
 {
-    LH_INFO("[OnCheckWinConditions()] called!");
+    LH_DEBUG("[OnCheckWinConditions()] called!");
     chain->callNext();
 }
 
