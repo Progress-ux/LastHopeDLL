@@ -17,3 +17,5 @@ void LastHope_PlayerKilled(
     edict_t* pVictim,
     edict_t* pKiller
 );
+
+void LastHope_CheckWinCondition();

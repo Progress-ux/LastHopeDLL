@@ -3,6 +3,7 @@
 #include <dllapi.h>
 
 #include "player_state.h"
+#include "player/player_team.h"
 #include "logger.h"
 #include "sdk_util.h"
 
@@ -87,17 +88,20 @@ void LastHope_PlayerPostThink(edict_t *pEntity)
 
         player.alive = false;
 
+        int team = pEntity->v.team;
+
         player.deathOrigin[0] = origin.x;
         player.deathOrigin[1] = origin.y;
         player.deathOrigin[2] = origin.z;
 
         LH_INFO(
-            "PlayerDeath: id=%d name=\"%s\" origin=(%.1f %.1f %.1f)",
+            "PlayerDeath: id=%d name=\"%s\" origin=(%.1f %.1f %.1f) team=%d",
             index,
             STRING(pEntity->v.netname),
             origin.x,
             origin.y,
-            origin.z
+            origin.z,
+            team
         );
     }
 
@@ -132,5 +136,56 @@ void LastHope_PlayerKilled(edict_t *pVictim, edict_t *pKiller)
         origin.x,
         origin.y,
         origin.z
+    );
+}
+
+void LastHope_CheckWinCondition()
+{
+    int aliveT = 0;
+    int aliveCT = 0;
+    int deadT = 0;
+    int deadCT = 0;
+
+    for (int id = 1; id <= MAX_PLAYERS; ++id)
+    {
+        PlayerState& player = g_players[id];
+
+        if (!player.connected || !player.in_game)
+            continue;
+
+        edict_t* ent = INDEXENT(id);
+
+        if (!ent || ent->free)
+            continue;
+
+        int team = GetPlayerTeam(ent);
+        LH_DEBUG(
+            "[OnCheckWinConditions] id=%d team=%d",
+            id,
+            team
+        );
+
+        if (player.alive)
+        {
+            if (team == TEAM_TERRORIST)
+                ++aliveT;
+            else if (team == TEAM_CT)
+                ++aliveCT;
+        }
+        else 
+        {
+            if (team == TEAM_TERRORIST)
+                ++deadT;
+            else if (team == TEAM_CT)
+                ++deadCT;
+        }
+    }
+
+    LH_DEBUG(
+        "[OnCheckWinConditions] T: alive=%d dead=%d | CT: alive=%d dead=%d",
+        aliveT,
+        deadT,
+        aliveCT,
+        deadCT
     );
 }
