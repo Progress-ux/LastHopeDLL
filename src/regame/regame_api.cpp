@@ -1,11 +1,18 @@
-#include "regame/regame_api.h"
 #include <dlfcn.h>
 #include <link.h>
-#include <cstring>
 
+#include <extdll.h>
+
+#include "regame/regame_api.h"
+#include "const.h"
+#include "last_hope.h"
 #include "logger.h"
 #include "regame/regame_abi.h"
 #include "regame/regamehookchain_abi.h"
+#include "player_state.h"
+#include "player/player_team.h"
+#include "sdk_util.h"
+
 
 static const char* g_game_dll_path = nullptr;
 static regame::IReGameApi* g_regame_api = nullptr;
@@ -35,7 +42,7 @@ void OnCheckWinConditions(
     regame::IHookChain<void>* chain
 )
 {
-    LH_DEBUG("[OnCheckWinConditions()] called!");
+    LastHope_CheckWinCondition();
     chain->callNext();
 }
 
