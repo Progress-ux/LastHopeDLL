@@ -28,16 +28,6 @@ INCLUDES = \
     -I$(HLSDK)/engine \
     -I$(METAMOD)/metamod \
     -Isrc
-    # -I$(REGAMEDLL)/regamedll \
-    # -I$(REGAMEDLL)/regamedll/common \
-    # -I$(REGAMEDLL)/regamedll/dlls \
-    # -I$(REGAMEDLL)/regamedll/engine \
-    # -I$(REGAMEDLL)/regamedll/public \
-    # -I$(REGAMEDLL)/regamedll/public/regamedll \
-    # -I$(REGAMEDLL)/regamedll/pm_shared \
-    # -I$(REGAMEDLL)/regamedll/game_shared \
-    # -I$(REGAMEDLL)/regamedll/dlls/API \
-    # -I$(REGAMEDLL)/regamedll/dlls/bot \
 
 TARGET = lib/test_mm_i386.so
 
@@ -51,7 +41,8 @@ SOURCES = \
 	src/player_state.cpp \
 	src/last_hope.cpp \
 	src/regame/regame_api.cpp \
-	src/regame/regame_hooks.cpp 
+	src/regame/regame_hooks.cpp \
+	src/player/player_team.cpp
 
 
 OBJECTS = $(SOURCES:.cpp=.o)
