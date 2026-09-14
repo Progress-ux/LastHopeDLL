@@ -2,12 +2,17 @@ CXX = gcc
 
 CXXFLAGS = \
     -m32 \
-    -ggdb3 \
     -Wall \
     -Wno-unknown-pragmas \
     -Wno-attributes \
     -fPIC \
 	-DREGAMEDLL_API_ONLY \
+
+ifdef RELEASE
+    CXXFLAGS += -O2
+else
+    CXXFLAGS += -ggdb3 -DDEBUG
+endif
 
 LDFLAGS = \
     -m32 \
@@ -17,6 +22,12 @@ LDFLAGS = \
 LDLIBS = \
     -ldl \
     -lm
+
+LOG_TO_CONSOLE ?= 0
+
+ifeq ($(LOG_TO_CONSOLE),1)
+	CXXFLAGS += -DLH_LOG_TO_CONSOLE 
+endif
 
 METAMOD = metamod-p
 HLSDK = $(METAMOD)/hlsdk
