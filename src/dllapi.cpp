@@ -7,6 +7,12 @@
 #include "last_hope.h"
 #include "sdk_util.h"
 
+void PlayerPostThink(edict_t *pEntity)
+{
+    LastHope_PlayerPostThink(pEntity);
+    RETURN_META(MRES_IGNORED);
+}
+
 static DLL_FUNCTIONS gFunctionTable = 
 {
 	NULL,					// pfnGameInit
@@ -37,7 +43,7 @@ static DLL_FUNCTIONS gFunctionTable =
 	NULL,					// pfnServerDeactivate
 
 	NULL,					// pfnPlayerPreThink
-	LastHope_PlayerPostThink,					// pfnPlayerPostThink
+	PlayerPostThink,					// pfnPlayerPostThink
 
 	NULL,					// pfnStartFrame
 	NULL,					// pfnParmsNewLevel
@@ -78,22 +84,26 @@ qboolean ClientConnect(
     char szRejectReason[128]
 )
 {
-    return LastHope_ClientConnect(
+    qboolean result = LastHope_ClientConnect(
         pEntity,
         pszName,
         pszAddress,
         szRejectReason
     );
+
+    RETURN_META_VALUE(MRES_IGNORED, result);
 }
 
 void ClientPutInServer(edict_t *pEntity)
 {
     LastHope_ClientPutInServer(pEntity);
+    RETURN_META(MRES_IGNORED);
 }
 
 void ClientDisconnect(edict_t *pEntity)
 {
     LastHope_ClientDisconnect(pEntity);
+    RETURN_META(MRES_IGNORED);
 }
 
 C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS *pFunctionTable, 
