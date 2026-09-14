@@ -1,14 +1,39 @@
 #include "logger.h"
 
-#include <cstdarg>
-#include <cstdio>
+#if defined(LH_LOG_TO_CONSOLE)
+#include <extdll.h>
+#include "sdk_util.h"
+#else
 #include <ctime>
 
 #include <fcntl.h>
 #include <unistd.h>
+#endif
+
+#include <cstdarg>
+#include <cstdio>
 
 void LH_Log(const char *level, const char *format, ...)
 {
+    char message[1024];
+
+    va_list args;
+    va_start(args, format);
+
+    vsnprintf(message, sizeof(message), format, args);
+
+    va_end(args);
+
+#if defined (LH_LOG_TO_CONSOLE)
+
+    UTIL_LogPrintf(
+        "[LastHope] [%s] %s\n",
+        level,
+        message
+    );
+
+#else
+
     int fd = open(
         "last_hope.log", 
         O_WRONLY | O_CREAT | O_APPEND,
@@ -18,14 +43,7 @@ void LH_Log(const char *level, const char *format, ...)
     if (fd < 0)
         return;
 
-    char message[1024];
 
-    va_list args;
-    va_start(args, format);
-
-    vsnprintf(message, sizeof(message), format, args);
-
-    va_end(args);
 
     time_t now = time(nullptr);
     tm local_time{};
@@ -56,4 +74,5 @@ void LH_Log(const char *level, const char *format, ...)
         write(fd, output, lenght);
 
     close(fd);
+#endif
 }
