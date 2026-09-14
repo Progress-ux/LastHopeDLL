@@ -12,5 +12,12 @@ enum PlayerTeam
     TEAM_SPECTATOR  = 3
 };
 
+struct TeamStatus 
+{
+    int alive = 0;
+    int dead = 0;
+};
+
 constexpr std::size_t TEAM_OFFSET = 476;
 PlayerTeam GetPlayerTeam(edict_t *pEntity);
+TeamStatus GetTeamStatus(PlayerTeam team);
