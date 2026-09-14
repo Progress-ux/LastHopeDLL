@@ -2,6 +2,7 @@
 
 #include <dllapi.h>
 
+#include "const.h"
 #include "player_state.h"
 #include "player/player_team.h"
 #include "logger.h"
@@ -21,6 +22,7 @@ qboolean LastHope_ClientConnect(
 
     g_players[index] = {};
     g_players[index].connected = true;
+
 
     LH_INFO(
         "ClientConnect: id=%d name=\"%s\" address=\"%s\"",
@@ -88,20 +90,15 @@ void LastHope_PlayerPostThink(edict_t *pEntity)
 
         player.alive = false;
 
-        int team = pEntity->v.team;
-
         player.deathOrigin[0] = origin.x;
         player.deathOrigin[1] = origin.y;
-        player.deathOrigin[2] = origin.z;
-
         LH_INFO(
-            "PlayerDeath: id=%d name=\"%s\" origin=(%.1f %.1f %.1f) team=%d",
+            "PlayerDeath: id=%d name=\"%s\" origin=(%.1f %.1f %.1f)",
             index,
             STRING(pEntity->v.netname),
             origin.x,
             origin.y,
-            origin.z,
-            team
+            origin.z
         );
     }
 
@@ -128,23 +125,18 @@ void LastHope_PlayerKilled(edict_t *pVictim, edict_t *pKiller)
     player.deathOrigin[1] = origin.y;
     player.deathOrigin[2] = origin.z;
 
-    LH_INFO(
-        "PlayerKilled: id=%d name=\"%s\" killed=%d origin=(%.1f %.1f %.1f)",
+    LH_DEBUG(
+        "[PlayerKilled] id=%d connected=%d in_game=%d",
         index,
-        STRING(pVictim->v.netname),
-        ENTINDEX(pKiller),
-        origin.x,
-        origin.y,
-        origin.z
+        player.connected,
+        player.in_game
     );
 }
 
 void LastHope_CheckWinCondition()
 {
-    int aliveT = 0;
-    int aliveCT = 0;
-    int deadT = 0;
-    int deadCT = 0;
+    TeamStatus t;
+    TeamStatus ct;
 
     for (int id = 1; id <= MAX_PLAYERS; ++id)
     {
@@ -158,34 +150,83 @@ void LastHope_CheckWinCondition()
         if (!ent || ent->free)
             continue;
 
-        int team = GetPlayerTeam(ent);
-        LH_DEBUG(
-            "[OnCheckWinConditions] id=%d team=%d",
-            id,
-            team
-        );
-
-        if (player.alive)
-        {
-            if (team == TEAM_TERRORIST)
-                ++aliveT;
-            else if (team == TEAM_CT)
-                ++aliveCT;
-        }
-        else 
-        {
-            if (team == TEAM_TERRORIST)
-                ++deadT;
-            else if (team == TEAM_CT)
-                ++deadCT;
-        }
+        PlayerTeam team = GetPlayerTeam(ent);
+        if (team == TEAM_TERRORIST)
+            t = GetTeamStatus(team);
+        else if (team == TEAM_CT)
+            ct = GetTeamStatus(team);
     }
 
     LH_DEBUG(
-        "[OnCheckWinConditions] T: alive=%d dead=%d | CT: alive=%d dead=%d",
-        aliveT,
-        deadT,
-        aliveCT,
-        deadCT
+        "[LastHope] T: alive=%d dead=%d | CT: alive=%d dead=%d",
+        t.alive,
+        t.dead,
+        ct.alive,
+        ct.dead
     );
+
+    if (!IsLastHopeSituation(t, ct))
+        return; 
+
+    PlayerTeam lastHopeTeam = 
+        GetLastHopeTeam(t, ct);
+
+    int playerID = FindLastHopePlayer(lastHopeTeam);
+
+    if (!playerID)
+        return;
+
+    LH_INFO(
+        "[LastHope] Canditate: id=%d team%d",
+        playerID,
+        static_cast<int>(lastHopeTeam)
+    );
+}
+
+bool IsLastHopeSituation(const TeamStatus &t, const TeamStatus &ct)
+{
+    const bool tEliminated = 
+        t.alive == 0 && t.dead > 0;
+
+    const bool ctEliminated = 
+        ct.alive == 0 && ct.dead > 0;
+
+    return tEliminated != ctEliminated;
+}
+
+PlayerTeam GetLastHopeTeam(const TeamStatus &t, const TeamStatus &ct)
+{
+    if (t.alive == 0 && t.dead > 0 && ct.alive > 0)
+        return TEAM_TERRORIST;
+
+    if (ct.alive == 0 && ct.dead > 0 && t.alive > 0)
+        return TEAM_CT;
+
+    return TEAM_UNASSIGNED;
+}
+
+int FindLastHopePlayer(PlayerTeam team)
+{
+    for (int id = 1; id <= MAX_PLAYERS; ++id)
+    {
+        PlayerState& player = g_players[id];
+
+        if (!player.connected || !player.in_game)
+            continue;
+
+        if (player.alive)
+            continue;
+
+        edict_t* ent = INDEXENT(id);
+
+        if (!ent || ent->free)
+            continue;
+
+        if (GetPlayerTeam(ent) != team)
+            continue;
+
+        return id;
+    }
+
+    return 0;
 }

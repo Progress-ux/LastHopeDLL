@@ -1,5 +1,6 @@
 #pragma once 
 
+#include "player/player_team.h"
 #include <extdll.h>
 
 qboolean LastHope_ClientConnect(
@@ -19,3 +20,7 @@ void LastHope_PlayerKilled(
 );
 
 void LastHope_CheckWinCondition();
+
+bool IsLastHopeSituation(const TeamStatus& t, const TeamStatus& ct);
+PlayerTeam GetLastHopeTeam(const TeamStatus& t, const TeamStatus& ct);
+int FindLastHopePlayer(PlayerTeam team);
