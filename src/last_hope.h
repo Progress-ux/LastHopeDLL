@@ -3,6 +3,10 @@
 #include "player/player_team.h"
 #include <extdll.h>
 
+static bool last_hope_used = false;
+
+static int LAST_HOPE_CHANCE = 20;
+
 qboolean LastHope_ClientConnect(
     edict_t* pEntity,
     const char* pszName,
