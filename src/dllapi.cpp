@@ -10,6 +10,7 @@
 void PlayerPostThink(edict_t *pEntity)
 {
     LastHope_PlayerPostThink(pEntity);
+
     RETURN_META(MRES_IGNORED);
 }
 
