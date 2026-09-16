@@ -9,8 +9,6 @@
 #include "logger.h"
 #include "regame/regame_abi.h"
 #include "regame/regamehookchain_abi.h"
-#include "player_state.h"
-#include "player/player_team.h"
 #include "sdk_util.h"
 
 
@@ -19,6 +17,8 @@ static regame::IReGameApi* g_regame_api = nullptr;
 static regame::IReGameHookchains* g_hookchains = nullptr;
 static regame::IReGameHookRegistry_CSGameRules_CheckWinConditions* 
     g_checkWinConditions = nullptr;
+static regame::IReGameHookRegistry_CSGameRules_RestartRound* 
+    g_restartRound = nullptr;
 
 static int FindGameDLL(
     struct dl_phdr_info* info,
@@ -162,6 +162,45 @@ bool Initialize()
     if (!RegisterCheckWinConditionsHook())
         return false;
 
+    if (!RegisterRestartRoundHook())
+        return false;
+
     return true;
 }
 
+void OnRestartRound(
+    regame::IHookChain<void>* chain
+)
+{
+    last_hope_used = false;
+    chain->callNext();
+}
+
+bool RegisterRestartRoundHook()
+{
+    if (!g_hookchains)
+    {
+        LH_ERROR("[RegisterRestartRoundHook()] hookchains is nullptr!");
+        return false;
+    }
+
+    g_restartRound =
+        g_hookchains->CSGameRules_RestartRound();
+
+    if (!g_restartRound)
+    {
+        LH_ERROR("[RegisterRestartRoundHook()] registry is nullptr!");
+        return false;
+    }
+
+    g_restartRound->registerHook(
+        OnRestartRound,
+        regame::HC_PRIORITY_DEFAULT
+    );
+
+    LH_INFO(
+        "[RegisterRestartRoundHook()] RestartRound hook registered!"
+    );
+
+    return true;
+}
