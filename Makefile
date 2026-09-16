@@ -6,12 +6,11 @@ CXXFLAGS = \
     -Wno-unknown-pragmas \
     -Wno-attributes \
     -fPIC \
-	-DREGAMEDLL_API_ONLY \
 
 ifdef RELEASE
     CXXFLAGS += -O2
 else
-    CXXFLAGS += -ggdb3 -DDEBUG
+    CXXFLAGS += -ggdb3 -DLH_DEBUG_LOG
 endif
 
 LDFLAGS = \
@@ -53,7 +52,8 @@ SOURCES = \
 	src/last_hope.cpp \
 	src/regame/regame_api.cpp \
 	src/regame/regame_hooks.cpp \
-	src/player/player_team.cpp
+	src/player/player_team.cpp \
+	src/player/player_methods.cpp
 
 
 OBJECTS = $(SOURCES:.cpp=.o)
