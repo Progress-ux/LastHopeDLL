@@ -83,7 +83,7 @@ namespace regame
 	class IReGameHookRegistry_CSGameRules_ServerDeactivate;
 	class IReGameHookRegistry_CSGameRules_CheckMapConditions;
 	class IReGameHookRegistry_CSGameRules_CleanUpMap;
-	class IReGameHookRegistry_CSGameRules_RestartRound;
+	// class IReGameHookRegistry_CSGameRules_RestartRound;
 
 	// class IReGameHookRegistry_CSGameRules_CheckWinConditions;
 
@@ -197,6 +197,9 @@ namespace regame
     using IReGameHookRegistry_CSGameRules_CheckWinConditions = 
         IHookChainRegistry<void>;
 	using CheckWinConditionsRegistry = IHookChainRegistry<void>;
+
+    using IReGameHookRegistry_CSGameRules_RestartRound = 
+        IHookChainRegistry<void>;
 
 	class IReGameHookchains
 	{
