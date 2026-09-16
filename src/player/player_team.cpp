@@ -2,7 +2,6 @@
 
 #include <cstdint>
 
-#include "logger.h"
 #include "player_state.h"
 #include "sdk_util.h"
 
@@ -41,9 +40,6 @@ TeamStatus GetTeamStatus(PlayerTeam team)
     {
         PlayerState& player = g_players[id];
 
-        if (!player.connected || !player.in_game)
-            continue;
-
         edict_t* ent = INDEXENT(id);
 
         if (!ent || ent->free)
@@ -54,7 +50,7 @@ TeamStatus GetTeamStatus(PlayerTeam team)
         if (playerTeam != team)
             continue;
 
-        if (player.alive)
+        if (player.wasAlive)
             ++status.alive;
         else
             ++status.dead;
