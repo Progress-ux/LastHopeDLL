@@ -43,8 +43,6 @@ void LH_Log(const char *level, const char *format, ...)
     if (fd < 0)
         return;
 
-
-
     time_t now = time(nullptr);
     tm local_time{};
 
