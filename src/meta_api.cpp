@@ -60,6 +60,7 @@ C_DLLEXPORT int Meta_Attach(PLUG_LOADTIME /* now */,
 		META_FUNCTIONS *pFunctionTable, meta_globals_t *pMGlobals, 
 		gamedll_funcs_t *pGamedllFuncs) 
 {
+    LH_START("==================================");
 	if(!pMGlobals) {
 		LOG_ERROR(PLID, "Meta_Attach called with null pMGlobals");
 		return(FALSE);
