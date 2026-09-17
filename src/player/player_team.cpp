@@ -38,8 +38,6 @@ TeamStatus GetTeamStatus(PlayerTeam team)
 
     for (int id = 1; id <= MAX_PLAYERS; ++id)
     {
-        PlayerState& player = g_players[id];
-
         edict_t* ent = INDEXENT(id);
 
         if (!ent || ent->free)
@@ -50,7 +48,7 @@ TeamStatus GetTeamStatus(PlayerTeam team)
         if (playerTeam != team)
             continue;
 
-        if (player.wasAlive)
+        if (ent->v.deadflag == DEAD_NO)
             ++status.alive;
         else
             ++status.dead;
