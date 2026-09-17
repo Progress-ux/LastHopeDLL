@@ -13,7 +13,7 @@ CXXFLAGS = \
 ifdef RELEASE
     CXXFLAGS += -O2
 else
-    CXXFLAGS += -ggdb3 -DLH_DEBUG_LOG
+    CXXFLAGS += -Og -ggdb3 -DLH_DEBUG_LOG
 endif
 
 ifeq ($(LOG_TO_CONSOLE),1)
@@ -39,7 +39,8 @@ INCLUDES = \
     -I$(METAMOD)/metamod \
     -Isrc
 
-TARGET = lib/test_mm_i386.so
+TARGET = lib/last_hope_mm_i386.so
+BUILD_DIR = build
 
 MAIN_SOURCE = \
 	src/main/dllapi.cpp \
@@ -75,22 +76,21 @@ SOURCES = \
 	$(PLAYER_SOURCE) \
 	$(UTIL_SOURCE)
 
-OBJECTS = $(SOURCES:.cpp=.o)
+OBJECTS = $(patsubst src/%.cpp,$(BUILD_DIR)/%.o,$(SOURCES))
 DEPS 	= $(OBJECTS:.o=.d)
 
 all: $(TARGET)
 
-lib:
-	mkdir -p lib
+$(TARGET): $(OBJECTS)
+	@mkdir -p $(dir $@)
+	$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
-$(TARGET): $(OBJECTS) | lib
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS) $(LDLIBS) -o $@
-
-%.o: %.cpp
+$(BUILD_DIR)/%.o: src/%.cpp
+	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-	rm -f $(OBJECTS) $(DEPS) 
+	rm -rf $(BUILD_DIR)
 	rm -f $(TARGET)
 
 -include $(DEPS)
