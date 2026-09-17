@@ -4,14 +4,48 @@
 #include <extdll.h>
 #include "sdk_util.h"
 #else
+#include <cerrno>
+#include <sys/stat.h>
 #include <ctime>
 
 #include <fcntl.h>
 #include <unistd.h>
+
+static int g_log_fd = -1;
+
 #endif
 
 #include <cstdarg>
 #include <cstdio>
+
+#if !defined(LH_LOG_TO_CONSOLE)
+
+void LH_LogInit()
+{
+    if (mkdir("last_hope_logs", 0755) < 0 && errno != EEXIST)
+        return;
+    g_log_fd = open(
+        "last_hope_logs/last_hope.log", 
+        O_WRONLY | O_CREAT | O_APPEND,
+        0644
+    );
+
+    if (g_log_fd < 0)
+    {
+        // TODO: Придумать как выводить ошибку в таком случае :(
+    }
+}
+
+void LH_LogShutdown()
+{
+    if (g_log_fd >= 0)
+    {
+        close(g_log_fd);
+        g_log_fd = -1;
+    }
+}
+
+#endif
 
 void LH_Log(const char *level, const char *format, ...)
 {
@@ -19,9 +53,7 @@ void LH_Log(const char *level, const char *format, ...)
 
     va_list args;
     va_start(args, format);
-
     vsnprintf(message, sizeof(message), format, args);
-
     va_end(args);
 
 #if defined (LH_LOG_TO_CONSOLE)
@@ -33,14 +65,7 @@ void LH_Log(const char *level, const char *format, ...)
     );
 
 #else
-
-    int fd = open(
-        "last_hope.log", 
-        O_WRONLY | O_CREAT | O_APPEND,
-        0644
-    );
-
-    if (fd < 0)
+    if (g_log_fd < 0)
         return;
 
     time_t now = time(nullptr);
@@ -69,8 +94,6 @@ void LH_Log(const char *level, const char *format, ...)
     );
     
     if (lenght > 0)
-        write(fd, output, lenght);
-
-    close(fd);
+        write(g_log_fd, output, lenght);
 #endif
 }
