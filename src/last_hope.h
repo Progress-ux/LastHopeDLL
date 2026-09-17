@@ -3,7 +3,7 @@
 #include "player/player_team.h"
 #include <extdll.h>
 
-static bool last_hope_used = false;
+extern bool last_hope_used;
 
 static int LAST_HOPE_CHANCE = 20;
 
@@ -28,3 +28,6 @@ void LastHope_CheckWinCondition();
 bool IsLastHopeSituation(const TeamStatus& t, const TeamStatus& ct);
 PlayerTeam GetLastHopeTeam(const TeamStatus& t, const TeamStatus& ct);
 int FindLastHopePlayer(PlayerTeam team);
+
+void setLastHopeUsed(bool last_hope);
+bool getLastHopeUsed();

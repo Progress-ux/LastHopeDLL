@@ -6,10 +6,13 @@
 
 #include "const.h"
 #include "enginecallback.h"
+#include "player/player_methods.h"
 #include "player_state.h"
 #include "player/player_team.h"
 #include "logger.h"
 #include "sdk_util.h"
+
+bool last_hope_used = false;
 
 qboolean LastHope_ClientConnect(
     edict_t *pEntity, 
@@ -93,13 +96,13 @@ void LastHope_PlayerPostThink(edict_t* pEntity)
     {
         player.playerConnected(alive);
 
-        LH_INFO(
-            "[PostThink] Registered player: id=%d name=\"%s\" alive=%d",
-            index,
-            STRING(pEntity->v.netname),
-            alive
-        );
-
+        // LH_INFO(
+        //     "[PostThink] Registered player: id=%d name=\"%s\" alive=%d",
+        //     index,
+        //     STRING(pEntity->v.netname),
+        //     alive
+        // );
+        //
         return;
     }
 
@@ -133,23 +136,39 @@ void LastHope_PlayerPostThink(edict_t* pEntity)
 
 void LastHope_CheckWinCondition()
 {
+    LH_DEBUG("last_hope_used=%d", last_hope_used);
     if (last_hope_used)
+    {
+        LH_DEBUG("last_hope_used");
         return;
+    }
 
-    if (RANDOM_LONG(1, 100) > LAST_HOPE_CHANCE)
-        return;
+    // if (RANDOM_LONG(1, 100) > LAST_HOPE_CHANCE)
+    //     return;
 
     TeamStatus t = GetTeamStatus(PlayerTeam::TEAM_TERRORIST);
     TeamStatus ct = GetTeamStatus(PlayerTeam::TEAM_CT);
-
+    LH_DEBUG("T: alive=%d dead=%d | CT: alive=%d dead=%d",
+         t.alive, t.dead, ct.alive, ct.dead);
     if (!IsLastHopeSituation(t, ct))
+    {
+        LH_DEBUG(
+            "!IsLastHopeSituation()"
+        );
         return;
+    }
 
     PlayerTeam team_last_hope = GetLastHopeTeam(t, ct);
+    LH_DEBUG("team_last_hope=%d", static_cast<int>(team_last_hope));
 
     int last_hope_player_id = FindLastHopePlayer(team_last_hope);
     if (!last_hope_player_id)
+    {
+        LH_DEBUG(
+            "!last_hope_player_id"
+        );
         return;
+    }
 
     edict_t* ent = INDEXENT(last_hope_player_id);
 
@@ -158,6 +177,8 @@ void LastHope_CheckWinCondition()
         STRING(ent->v.netname),
         last_hope_player_id
     );
+
+    PlayerMethods::RoundRespawn(ent);
 
     last_hope_used = true;
 }
@@ -215,3 +236,6 @@ int FindLastHopePlayer(PlayerTeam team)
 
     return canditates[RANDOM_LONG(0, count - 1)];
 }
+
+void setLastHopeUsed(bool last_hope) { last_hope_used = last_hope; }
+bool getLastHopeUsed() { return last_hope_used; }
