@@ -172,7 +172,8 @@ void OnRestartRound(
     regame::IHookChain<void>* chain
 )
 {
-    last_hope_used = false;
+    setLastHopeUsed(false);
+    LH_DEBUG("RestartRound, last_hope_used=%d", getLastHopeUsed());
     chain->callNext();
 }
 
