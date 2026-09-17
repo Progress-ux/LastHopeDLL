@@ -1,6 +1,6 @@
 #include "player_methods.h"
 
-#include "logger.h"
+#include "util/logger.h"
 
 namespace 
 {

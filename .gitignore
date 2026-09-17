@@ -3,6 +3,7 @@ lib/
 metamod-p/
 
 *.o
+*.d
 *.so
 *.dll 
 

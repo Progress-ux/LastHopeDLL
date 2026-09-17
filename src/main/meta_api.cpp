@@ -1,11 +1,10 @@
 #include <extdll.h>			// always
 #include <meta_api.h>		// of course
 
-#include "logger.h"
+#include "util/logger.h"
 #include "mutil.h"
 #include "osdep.h"
-#include "regame/regame_api.h"
-#include "sdk_util.h"		// UTIL_LogPrintf, etc
+#include "hooks/regame_loader.h"
 
 // Must provide at least one of these..
 static META_FUNCTIONS gMetaFunctionTable = {
@@ -62,12 +61,12 @@ C_DLLEXPORT int Meta_Attach(PLUG_LOADTIME /* now */,
 {
     LH_START("==================================");
 	if(!pMGlobals) {
-		LOG_ERROR(PLID, "Meta_Attach called with null pMGlobals");
+		LH_ERROR("Meta_Attach called with null pMGlobals");
 		return(FALSE);
 	}
 	gpMetaGlobals=pMGlobals;
 	if(!pFunctionTable) {
-		LOG_ERROR(PLID, "Meta_Attach called with null pFunctionTable");
+		LH_ERROR("Meta_Attach called with null pFunctionTable");
 		return(FALSE);
 	}
 	memcpy(pFunctionTable, &gMetaFunctionTable, sizeof(META_FUNCTIONS));

@@ -3,14 +3,21 @@ CXX = gcc
 CXXFLAGS = \
     -m32 \
     -Wall \
+    -Wextra \
+    -Wno-unused-parameter \
     -Wno-unknown-pragmas \
     -Wno-attributes \
     -fPIC \
+    -MMD -MP
 
 ifdef RELEASE
     CXXFLAGS += -O2
 else
     CXXFLAGS += -ggdb3 -DLH_DEBUG_LOG
+endif
+
+ifeq ($(LOG_TO_CONSOLE),1)
+	CXXFLAGS += -DLH_LOG_TO_CONSOLE 
 endif
 
 LDFLAGS = \
@@ -22,15 +29,8 @@ LDLIBS = \
     -ldl \
     -lm
 
-LOG_TO_CONSOLE ?= 0
-
-ifeq ($(LOG_TO_CONSOLE),1)
-	CXXFLAGS += -DLH_LOG_TO_CONSOLE 
-endif
-
 METAMOD = metamod-p
 HLSDK = $(METAMOD)/hlsdk
-REGAMEDLL = $(CURDIR)/ReGameDLL_CS
 
 INCLUDES = \
     -I$(HLSDK)/common \
@@ -41,34 +41,58 @@ INCLUDES = \
 
 TARGET = lib/test_mm_i386.so
 
-SOURCES = \
-	src/dllapi.cpp \
-	src/engine_api.cpp \
-	src/h_export.cpp \
-	src/meta_api.cpp \
-	src/sdk_util.cpp \
-	src/logger.cpp \
-	src/player_state.cpp \
-	src/last_hope.cpp \
-	src/regame/regame_api.cpp \
-	src/regame/regame_hooks.cpp \
-	src/player/player_team.cpp \
-	src/player/player_methods.cpp
+MAIN_SOURCE = \
+	src/main/dllapi.cpp \
+	src/main/engine_api.cpp \
+	src/main/h_export.cpp \
+	src/main/meta_api.cpp
 
+GAME_RULES_SOURCE = \
+	src/game_rules/last_hope_rules.cpp
+
+UTIL_SOURCE = \
+	src/util/sdk_util.cpp \
+	src/util/logger.cpp
+
+CORE_SOURCE = \
+	src/core/last_hope.cpp
+
+HOOKS_SOURCE = \
+	src/hooks/regame_hooks.cpp \
+	src/hooks/entity_hooks.cpp \
+	src/hooks/regame_loader.cpp
+
+PLAYER_SOURCE = \
+	src/player/player_team.cpp \
+	src/player/player_methods.cpp \
+	src/player/player_state.cpp
+
+SOURCES = \
+	$(CORE_SOURCE) \
+	$(GAME_RULES_SOURCE) \
+	$(HOOKS_SOURCE) \
+	$(MAIN_SOURCE) \
+	$(PLAYER_SOURCE) \
+	$(UTIL_SOURCE)
 
 OBJECTS = $(SOURCES:.cpp=.o)
+DEPS 	= $(OBJECTS:.o=.d)
 
 all: $(TARGET)
 
-$(TARGET): $(OBJECTS)
+lib:
 	mkdir -p lib
+
+$(TARGET): $(OBJECTS) | lib
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJECTS) $(LDLIBS) -o $@
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-	rm -f $(OBJECTS)
+	rm -f $(OBJECTS) $(DEPS) 
 	rm -f $(TARGET)
+
+-include $(DEPS)
 
 .PHONY: all clean

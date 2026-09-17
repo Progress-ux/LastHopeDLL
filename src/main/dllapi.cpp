@@ -4,7 +4,7 @@
 #include <meta_api.h>
 
 #include "const.h"
-#include "last_hope.h"
+#include "hooks/entity_hooks.h"
 #include "sdk_util.h"
 
 void PlayerPostThink(edict_t *pEntity)
