@@ -3,6 +3,7 @@
 #include "core/last_hope.h"
 #include "util/logger.h"
 #include "regame_context.h"
+#include <dllapi.h>
 
 namespace 
 {
@@ -81,4 +82,28 @@ bool RegisterRestartRoundHook()
     LH_INFO("[RegisterRestartRoundHook] hook registered!");
 
     return true;
+}
+
+void UnregisterCheckWinConditionsHook()
+{
+    if (!g_checkWinConditions)
+        return;
+
+    g_checkWinConditions->unregisterHook(OnCheckWinConditions);
+
+    g_checkWinConditions = nullptr;
+
+    LH_INFO("[UnregisterCheckWinConditionsHook] hook unregistered");
+}
+
+void UnregisterRestartRoundHook()
+{
+    if (!g_restartRound)
+        return;
+
+    g_restartRound->unregisterHook(OnRestartRound);
+
+    g_restartRound = nullptr;
+
+    LH_INFO("[UnregisterRestartRoundHook] hook unregistered");
 }

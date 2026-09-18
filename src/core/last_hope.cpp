@@ -2,8 +2,8 @@
 
 #include <dllapi.h>
 
-#include "player/player_methods.h"
 #include "game_rules/last_hope_rules.h"
+#include "player/player_methods.h"
 #include "util/logger.h"
 #include "sdk_util.h"
 

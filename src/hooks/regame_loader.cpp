@@ -113,10 +113,35 @@ bool Initialize()
         return false;
 
     if (!RegisterCheckWinConditionsHook())
+    {
+        ReGameContext::Reset();
         return false;
+    }
 
     if (!RegisterRestartRoundHook())
+    {
+        UnregisterCheckWinConditionsHook();
+        ReGameContext::Reset();
         return false;
+    }
 
     return true;
+}
+
+void Shutdown()
+{
+    if (!ReGameContext::isInitialize())
+    {
+        LH_DEBUG("[Shutdown] Already shutdown");
+        return;
+    }
+
+    LH_DEBUG("[Shutdown] Removing ReGameDLL hooks");
+
+    UnregisterRestartRoundHook();
+    UnregisterCheckWinConditionsHook();
+
+    ReGameContext::Reset();
+
+    LH_INFO("[Shutdown] ReGameDLL shutdown complete");
 }

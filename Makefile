@@ -2,13 +2,11 @@ CXX = gcc
 
 CXXFLAGS = \
     -m32 \
+    -ggdb3 \
     -Wall \
-    -Wextra \
-    -Wno-unused-parameter \
     -Wno-unknown-pragmas \
     -Wno-attributes \
     -fPIC \
-    -MMD -MP
 
 ifdef RELEASE
     CXXFLAGS += -O2
@@ -61,7 +59,8 @@ CORE_SOURCE = \
 HOOKS_SOURCE = \
 	src/hooks/regame_hooks.cpp \
 	src/hooks/entity_hooks.cpp \
-	src/hooks/regame_loader.cpp
+	src/hooks/regame_loader.cpp \
+	src/hooks/regame_context.cpp
 
 PLAYER_SOURCE = \
 	src/player/player_team.cpp \

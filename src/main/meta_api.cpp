@@ -103,6 +103,7 @@ C_DLLEXPORT int Meta_Detach(PLUG_LOADTIME /* now */,
 {
     LH_START("Last Hope detaching");
 
+    Shutdown();
     LH_LogShutdown();
 
 	return(TRUE);

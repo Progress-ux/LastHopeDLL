@@ -17,13 +17,22 @@ static int g_log_fd = -1;
 
 #include <cstdarg>
 #include <cstdio>
+#include <cstring>
 
 #if !defined(LH_LOG_TO_CONSOLE)
 
 void LH_LogInit()
 {
     if (mkdir("last_hope_logs", 0755) < 0 && errno != EEXIST)
+    {
+        fprintf(
+            stderr,
+            "[LastHope] mkdir failed: %s\n",
+            strerror(errno)
+        );
         return;
+    }
+
     g_log_fd = open(
         "last_hope_logs/last_hope.log", 
         O_WRONLY | O_CREAT | O_APPEND,
@@ -32,7 +41,12 @@ void LH_LogInit()
 
     if (g_log_fd < 0)
     {
-        // TODO: Придумать как выводить ошибку в таком случае :(
+        fprintf(
+            stderr,
+            "[LastHope] open log failed: %s\n",
+            strerror(errno)
+        );
+        return;
     }
 }
 
@@ -44,6 +58,11 @@ void LH_LogShutdown()
         g_log_fd = -1;
     }
 }
+
+#else 
+
+void LH_LogInit() {}
+void LH_LogShutdown() {}
 
 #endif
 
