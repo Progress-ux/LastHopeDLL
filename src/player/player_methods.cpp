@@ -1,6 +1,10 @@
 #include "player_methods.h"
 
+#include "const.h"
 #include "util/logger.h"
+#include <cstring>
+
+#define SVC_SETVIEW 5
 
 namespace 
 {
@@ -11,21 +15,33 @@ namespace
 
 namespace PlayerMethods
 {
-    void RoundRespawn(edict_t *pEntity)
+    void RoundRespawn(edict_t *ent)
     {
-        if (!pEntity || !pEntity->pvPrivateData)
+        if (!ent || !ent->pvPrivateData)
         {
-            LH_ERROR("[PlayerMethods] [RoundRespawn] Invalid player/private data");
+            LH_ERROR(
+                "[PlayerMethods] [RoundRespawn] "
+                "Invalid player/private data"
+            );
             return;
         }
 
-        void* player = pEntity->pvPrivateData;
+        if (ent->v.health <= 0.0f || ent->v.deadflag == 1)
+        {
+            ent->v.deadflag = 2;
+            ent->v.health = 1.0f;
+        }
+
+        ent->v.iuser1 = 0;
+        ent->v.iuser2 = 0;
+        ent->v.iuser3 = 0;
+
+        void* player = ent->pvPrivateData;
         void** vtable = *reinterpret_cast<void***>(player);
 
         auto fn = reinterpret_cast<RoundRespawnFn>(
             vtable[ROUND_RESPAWN_VTABLE_INDEX]
         );
-
         fn(player);
     }
 }
