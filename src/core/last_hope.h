@@ -1,16 +1,15 @@
-#pragma once 
+#pragma once
+#include "player/player_team.h"
 
-#include <extdll.h>
+extern bool can_last_hope_use;
 
-extern bool last_hope_used;
-extern int LAST_HOPE_CHANCE;
+extern int g_last_hope_player_id;
 
-void LastHope_PlayerKilled(
-    edict_t* pVictim,
-    edict_t* pKiller
-);
+extern bool g_last_hope_pending;
 
-bool LastHope_TryRespawnPlayer();
+bool LastHope_CheckWinCondition(TeamStatus& t, TeamStatus& ct);
+bool LastHope_SetRandomPlayer(int& last_hope_player_id, const TeamStatus& t, const TeamStatus& ct);
+bool LastHope_TryRespawnPlayer(int last_hope_player_id);
 
 void setLastHopeUsed(bool last_hope);
 bool getLastHopeUsed();
