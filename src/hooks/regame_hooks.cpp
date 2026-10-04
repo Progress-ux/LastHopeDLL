@@ -5,21 +5,27 @@
 #include "regame_context.h"
 #include <dllapi.h>
 
-namespace 
+namespace
 {
-    regame::IReGameHookRegistry_CSGameRules_CheckWinConditions* 
+    regame::IReGameHookRegistry_CSGameRules_CheckWinConditions*
         g_checkWinConditions = nullptr;
-    regame::IReGameHookRegistry_CSGameRules_RestartRound* 
+    regame::IReGameHookRegistry_CSGameRules_RestartRound*
         g_restartRound = nullptr;
 
     void OnCheckWinConditions(regame::IHookChain<void>* chain)
     {
+        TeamStatus t{}, ct{};
+        if (LastHope_CheckWinCondition(t, ct))
+            return; 
+
         chain->callNext();
     }
 
     void OnRestartRound(regame::IHookChain<void>* chain)
     {
-        setLastHopeUsed(false);
+        setLastHopeUsed(true);
+        g_last_hope_player_id = -1;
+        g_last_hope_pending = false;
         LH_DEBUG("RestartRound, last_hope_used=%d", getLastHopeUsed());
         chain->callNext();
     }
