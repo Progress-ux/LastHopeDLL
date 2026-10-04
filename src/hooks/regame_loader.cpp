@@ -7,6 +7,7 @@
 
 #include <cstring>
 
+#include "hooks/player_deaththink_hook.h"
 #include "hooks/regame_hooks.h"
 #include "hooks/regame_context.h"
 #include "util/logger.h"
@@ -112,8 +113,15 @@ bool Initialize()
     if (!ReGameContext::Init(api))
         return false;
 
+    if (!PlayerDeathThinkHook::Install())
+    {
+        ReGameContext::Reset();
+        return false;
+    }
+
     if (!RegisterCheckWinConditionsHook())
     {
+        PlayerDeathThinkHook::Uninstall();
         ReGameContext::Reset();
         return false;
     }
@@ -121,6 +129,7 @@ bool Initialize()
     if (!RegisterRestartRoundHook())
     {
         UnregisterCheckWinConditionsHook();
+        PlayerDeathThinkHook::Uninstall();
         ReGameContext::Reset();
         return false;
     }

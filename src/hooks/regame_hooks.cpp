@@ -7,7 +7,6 @@
 
 namespace 
 {
-
     regame::IReGameHookRegistry_CSGameRules_CheckWinConditions* 
         g_checkWinConditions = nullptr;
     regame::IReGameHookRegistry_CSGameRules_RestartRound* 
@@ -15,7 +14,6 @@ namespace
 
     void OnCheckWinConditions(regame::IHookChain<void>* chain)
     {
-        LastHope_CheckWinCondition();
         chain->callNext();
     }
 
@@ -25,7 +23,6 @@ namespace
         LH_DEBUG("RestartRound, last_hope_used=%d", getLastHopeUsed());
         chain->callNext();
     }
-
 } // namespace
 
 
