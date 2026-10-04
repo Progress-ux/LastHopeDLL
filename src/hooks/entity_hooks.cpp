@@ -1,5 +1,6 @@
 #include "entity_hooks.h"
 
+#include "player/player_methods.h"
 #include "player/player_state.h"
 #include "util/logger.h"
 #include "sdk_util.h"
@@ -82,27 +83,6 @@ void LastHope_PlayerPostThink(edict_t* pEntity)
 
     bool alive = (pEntity->v.deadflag == DEAD_NO);
 
-    if (!player.connected)
-    {
-        player.playerConnected(alive);
-
-        // LH_INFO(
-        //     "[PostThink] Registered player: id=%d name=\"%s\" alive=%d",
-        //     index,
-        //     STRING(pEntity->v.netname),
-        //     alive
-        // );
-        //
-        return;
-    }
-
-    if (!player.initialized)
-    {
-        player.wasAlive = alive;
-        player.initialized = true;
-        return;
-    }
-
     if (player.wasAlive && !alive)
     {
         Vector origin = pEntity->v.origin;
@@ -112,7 +92,7 @@ void LastHope_PlayerPostThink(edict_t* pEntity)
         player.deathOrigin[2] = origin.z;
 
         LH_DEBUG(
-            "PlayerDeath: id=%d name=\"%s\" origin=(%.1f %.1f %.1f)",
+            "[PlayerPostThink] DeadState: id=%d name=\"%s\" origin=(%.1f %.1f %.1f)",
             index,
             STRING(pEntity->v.netname),
             origin.x,
