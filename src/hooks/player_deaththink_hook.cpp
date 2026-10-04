@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <cstring>
 
+#include "sdk_util.h"
 #include "util/logger.h"
 
 namespace
@@ -308,29 +309,23 @@ namespace
     void __attribute__((force_align_arg_pointer))
     PlayerDeathThink_Detour(void* player)
     {
-        LH_DEBUG(
-            "[PlayerDeathThink] DETOUR player=%p",
-            player
-        );
+        LH_DEBUG("[PlayerDeathThink] DETOUR player=%p", player);
 
-        if (LastHope_TryRespawnPlayer())
-            return;
+        if (g_last_hope_pending && g_last_hope_player_id > 0)
+        {
+            if (g_last_hope_player_id)
+            {
+                if (LastHope_TryRespawnPlayer(g_last_hope_player_id))
+                {
+                    g_last_hope_pending = false;
+                    g_last_hope_player_id = -1;
+                    return; // не вызываем trampoline
+                }
+            }
+        }
 
-        auto original =
-            reinterpret_cast<PlayerDeathThinkFn>(
-                g_state.trampoline
-            );
-
-        LH_DEBUG(
-            "[PlayerDeathThink] trampoline=%p",
-            reinterpret_cast<void*>(original)
-        );
-
+        auto original = reinterpret_cast<PlayerDeathThinkFn>(g_state.trampoline);
         original(player);
-
-        LH_DEBUG(
-            "[PlayerDeathThink] returned from trampoline"
-        );
     }
 
     bool Patch()
