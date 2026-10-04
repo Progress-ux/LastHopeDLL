@@ -60,7 +60,8 @@ HOOKS_SOURCE = \
 	src/hooks/regame_hooks.cpp \
 	src/hooks/entity_hooks.cpp \
 	src/hooks/regame_loader.cpp \
-	src/hooks/regame_context.cpp
+	src/hooks/regame_context.cpp \
+	src/hooks/player_deaththink_hook.cpp 
 
 PLAYER_SOURCE = \
 	src/player/player_team.cpp \
