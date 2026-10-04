@@ -20,21 +20,10 @@ namespace PlayerMethods
         if (!ent || !ent->pvPrivateData)
         {
             LH_ERROR(
-                "[PlayerMethods] [RoundRespawn] "
-                "Invalid player/private data"
+                "[PlayerMethods] [RoundRespawn] Invalid player/private data"
             );
             return;
         }
-
-        if (ent->v.health <= 0.0f || ent->v.deadflag == 1)
-        {
-            ent->v.deadflag = 2;
-            ent->v.health = 1.0f;
-        }
-
-        ent->v.iuser1 = 0;
-        ent->v.iuser2 = 0;
-        ent->v.iuser3 = 0;
 
         void* player = ent->pvPrivateData;
         void** vtable = *reinterpret_cast<void***>(player);
