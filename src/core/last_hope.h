@@ -10,7 +10,7 @@ void LastHope_PlayerKilled(
     edict_t* pKiller
 );
 
-void LastHope_CheckWinCondition();
+bool LastHope_TryRespawnPlayer();
 
 void setLastHopeUsed(bool last_hope);
 bool getLastHopeUsed();

@@ -10,13 +10,13 @@
 bool last_hope_used = false;
 int LAST_HOPE_CHANCE = 20;
 
-void LastHope_CheckWinCondition()
+bool LastHope_TryRespawnPlayer()
 {
     LH_DEBUG("last_hope_used=%d", last_hope_used);
     if (last_hope_used)
     {
         LH_DEBUG("last_hope_used");
-        return;
+        return false;
     }
 
     // if (RANDOM_LONG(1, 100) > LAST_HOPE_CHANCE)
@@ -31,7 +31,7 @@ void LastHope_CheckWinCondition()
         LH_DEBUG(
             "!IsLastHopeSituation()"
         );
-        return;
+        return false;
     }
 
     PlayerTeam team_last_hope = GetLastHopeTeam(t, ct);
@@ -43,7 +43,7 @@ void LastHope_CheckWinCondition()
         LH_DEBUG(
             "!last_hope_player_id"
         );
-        return;
+        return false;
     }
 
     edict_t* ent = INDEXENT(last_hope_player_id);
@@ -56,7 +56,21 @@ void LastHope_CheckWinCondition()
 
     PlayerMethods::RoundRespawn(ent);
 
+    ent->v.deadflag = DEAD_NO;
+    ent->v.health = 100;              // или сколько нужно
+    ent->v.takedamage = DAMAGE_YES;
+    ent->v.solid = SOLID_SLIDEBOX;
+    ent->v.movetype = MOVETYPE_WALK;
+    ent->v.flags &= ~FL_ONGROUND;
+    ent->v.velocity = Vector(0, 0, 0);
+    ent->v.weapons = 0;               // сброс оружия
+
+    ent->v.iuser1 = 0;
+    ent->v.iuser2 = 0;
+    ent->v.iuser3 = 0;
+
     last_hope_used = true;
+    return true;
 }
 
 void setLastHopeUsed(bool last_hope) { last_hope_used = last_hope; }
