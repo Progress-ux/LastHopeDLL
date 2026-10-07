@@ -14,8 +14,8 @@ else
     CXXFLAGS += -Og -ggdb3 -DLH_DEBUG_LOG
 endif
 
-ifeq ($(LOG_TO_CONSOLE),1)
-	CXXFLAGS += -DLH_LOG_TO_CONSOLE 
+ifeq ($(LH_PLUG_TO_REMOTE_SERVER),1)
+	CXXFLAGS += -DLH_PLUG_TO_REMOTE_SERVER 
 endif
 
 LDFLAGS = \
