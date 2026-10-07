@@ -15,7 +15,6 @@ int  LAST_HOPE_CHANCE = 20;
 
 bool LastHope_CheckWinCondition(TeamStatus& t, TeamStatus& ct)
 {
-    LH_DEBUG("last_hope_used=%d", can_last_hope_use);
     if (!can_last_hope_use)
     {
         LH_DEBUG("last_hope already used");
@@ -100,5 +99,5 @@ bool LastHope_TryRespawnPlayer(int last_hope_player_id)
     return true;
 }
 
-void setLastHopeUsed(bool last_hope) { can_last_hope_use = last_hope; }
-bool getLastHopeUsed() { return can_last_hope_use; }
+void setCanLastHopeUse(bool last_hope) { can_last_hope_use = last_hope; }
+bool getCanLastHopeUse() { return can_last_hope_use; }

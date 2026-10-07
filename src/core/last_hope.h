@@ -11,5 +11,5 @@ bool LastHope_CheckWinCondition(TeamStatus& t, TeamStatus& ct);
 bool LastHope_SetRandomPlayer(int& last_hope_player_id, const TeamStatus& t, const TeamStatus& ct);
 bool LastHope_TryRespawnPlayer(int last_hope_player_id);
 
-void setLastHopeUsed(bool last_hope);
-bool getLastHopeUsed();
+void setCanLastHopeUse(bool last_hope);
+bool getCanLastHopeUse();
