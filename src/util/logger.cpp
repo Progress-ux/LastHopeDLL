@@ -1,9 +1,5 @@
 #include "logger.h"
 
-#if defined(LH_LOG_TO_CONSOLE)
-#include <extdll.h>
-#include "sdk_util.h"
-#else
 #include <cerrno>
 #include <sys/stat.h>
 #include <ctime>
@@ -13,17 +9,19 @@
 
 static int g_log_fd = -1;
 
-#endif
-
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
 
-#if !defined(LH_LOG_TO_CONSOLE)
+#if defined (LH_PLUG_TO_REMOTE_SERVER)
+const char* path = "/game/cstrike/last_hope_logs";
+#else
+const char* path = "last_hope_logs";
+#endif
 
 void LH_LogInit()
 {
-    if (mkdir("last_hope_logs", 0755) < 0 && errno != EEXIST)
+    if (mkdir(path, 0755) < 0 && errno != EEXIST)
     {
         fprintf(
             stderr,
@@ -33,8 +31,11 @@ void LH_LogInit()
         return;
     }
 
+    char log_file_path[512];
+    snprintf(log_file_path, sizeof(log_file_path), "%s/last_hope.log", path);
+
     g_log_fd = open(
-        "last_hope_logs/last_hope.log", 
+        log_file_path,
         O_WRONLY | O_CREAT | O_APPEND,
         0644
     );
@@ -59,13 +60,6 @@ void LH_LogShutdown()
     }
 }
 
-#else 
-
-void LH_LogInit() {}
-void LH_LogShutdown() {}
-
-#endif
-
 void LH_Log(const char *level, const char *format, ...)
 {
     char message[1024];
@@ -74,16 +68,6 @@ void LH_Log(const char *level, const char *format, ...)
     va_start(args, format);
     vsnprintf(message, sizeof(message), format, args);
     va_end(args);
-
-#if defined (LH_LOG_TO_CONSOLE)
-
-    UTIL_LogPrintf(
-        "[LastHope] [%s] %s\n",
-        level,
-        message
-    );
-
-#else
     if (g_log_fd < 0)
         return;
 
@@ -114,5 +98,4 @@ void LH_Log(const char *level, const char *format, ...)
     
     if (lenght > 0)
         write(g_log_fd, output, lenght);
-#endif
 }
