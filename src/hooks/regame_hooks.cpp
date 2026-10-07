@@ -23,10 +23,10 @@ namespace
 
     void OnRestartRound(regame::IHookChain<void>* chain)
     {
-        setLastHopeUsed(true);
+        setCanLastHopeUse(true);
         g_last_hope_player_id = -1;
         g_last_hope_pending = false;
-        LH_DEBUG("RestartRound, last_hope_used=%d", getLastHopeUsed());
+        LH_DEBUG("RestartRound, can_last_hope_use=%d", getCanLastHopeUse());
         chain->callNext();
     }
 } // namespace
