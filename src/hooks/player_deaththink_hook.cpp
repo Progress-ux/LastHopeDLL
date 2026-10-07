@@ -8,22 +8,17 @@
 #include <cstdint>
 #include <cstring>
 
-#include "sdk_util.h"
 #include "util/logger.h"
 
 namespace
 {
-    /*
-     * CBasePlayer::PlayerDeathThink()
-     *
-     * From the current ReGameDLL build:
-     *
-     *   001415f0 T CBasePlayer::PlayerDeathThink()
-     *
-     * This is an RVA inside cs.so.
-     */
+#if defined (LH_PLUG_TO_REMOTE_SERVER)
+    constexpr uintptr_t PLAYER_DEATH_THINK_RVA = 0x13DE20;
+    constexpr uintptr_t GOT_RVA = 0x002D3000;
+#else
     constexpr uintptr_t PLAYER_DEATH_THINK_RVA = 0x001415f0;
-
+    constexpr uintptr_t GOT_RVA = 0x002D8FF4;
+#endif
     /*
      * Current function prologue:
      *
@@ -43,22 +38,6 @@ namespace
      *   1415fa: 8d 4c 24 04       lea 0x4(%esp),%ecx
      */
     constexpr std::size_t CONTINUE_OFFSET = 10;
-
-    /*
-     * Current GOT calculation:
-     *
-     *   EAX = address of instruction after CALL
-     *   EAX += 0x1979ff
-     *
-     * The instruction after CALL is 0x1415f5.
-     *
-     * Therefore:
-     *
-     *   0x1415fa + 0x1979ff = 0x2d8ff9
-     *
-     * Runtime GOT address = cs_base + 0x2d8ff9.
-     */
-    constexpr uintptr_t GOT_RVA = 0x002D8FF4;
 
     using PlayerDeathThinkFn = void (*)(void* player);
 
