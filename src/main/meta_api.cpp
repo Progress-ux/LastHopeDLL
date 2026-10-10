@@ -22,7 +22,7 @@ static META_FUNCTIONS gMetaFunctionTable = {
 plugin_info_t Plugin_info = {
 	META_INTERFACE_VERSION,	// ifvers
 	"Last Hope",	// name
-	"1.0",	// version
+	"1.1",	// version
 	"2026/09/08",	// date
 	"Progress",	// author
 	"https://github.com/Progress-ux/LastHopeDLL",	// url
