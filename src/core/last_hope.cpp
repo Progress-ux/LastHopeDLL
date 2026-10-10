@@ -2,6 +2,7 @@
 
 #include <dllapi.h>
 
+#include "abi/regame_player_abi.h"
 #include "const.h"
 #include "game_rules/last_hope_rules.h"
 #include "player/player_methods.h"
@@ -10,6 +11,7 @@
 #include "util/logger.h"
 #include "sdk_util.h"
 #include "util/weapon.h"
+#include "vector.h"
 
 bool can_last_hope_use = false;
 int  g_last_hope_player_id = -1;
@@ -18,6 +20,65 @@ int  LAST_HOPE_CHANCE = 20;
 
 namespace 
 {
+    void RestorePlayerOrigin(edict_t* ent, const PlayerState& player)
+    {
+        if (!ent || !ent->pvPrivateData)
+            return;
+
+        ent->v.origin.x = player.deathOrigin[0];
+        ent->v.origin.y = player.deathOrigin[1];
+        ent->v.origin.z = player.deathOrigin[2];
+
+        ent->v.oldorigin = ent->v.origin;
+
+        ent->v.velocity = Vector(0.0f, 0.0f, 0.0f);
+        ent->v.basevelocity = Vector(0.0f, 0.0f, 0.0f);
+        LH_DEBUG(
+            "player=%d origin=(%.1f %.1f %.1f)",
+            ENTINDEX(ent),
+            ent->v.origin.x,
+            ent->v.origin.y,
+            ent->v.origin.z
+        );
+    }
+
+    void RestoreSavedAmmo(
+        void* player,
+        const SavedPlayerInventory& inventory
+    )
+    {
+        if (!player || !inventory.valid)
+            return;
+
+        for (int i = 0; i < regame::MAX_AMMO_SLOTS; ++i)
+        {
+            regame::SetAmmo(player, i, inventory.ammo[i]);
+        }
+
+        for (int i = 0; i < inventory.weaponCount; ++i)
+        {
+            const SavedWeapon& saved = inventory.weapons[i];
+
+            if (!saved.valid)
+                continue;
+
+            void* item = regame::FindPlayerItem(player, saved.id);
+
+            if (!item)
+            {
+                continue;
+            }
+
+            regame::SetClip(item, saved.clip);
+            LH_DEBUG(
+                "id=%d item=%p clip=%d",
+                saved.id,
+                item,
+                saved.clip
+            );
+        }
+    }
+
     void RestoreSavedWeapon(CBasePlayer* player, int playerId)
     {
         if (!player || playerId < 1 || playerId > MAX_PLAYERS)
@@ -61,7 +122,10 @@ namespace
                 playerId, classname, item
             );
         }
+
+        RestoreSavedAmmo(player, inventory);
     }
+
 }
 
 bool LastHope_CheckWinCondition(TeamStatus& t, TeamStatus& ct)
@@ -84,11 +148,11 @@ bool LastHope_CheckWinCondition(TeamStatus& t, TeamStatus& ct)
         return false;
     }
 
-    // if (RANDOM_LONG(1, 100) > LAST_HOPE_CHANCE)
-    // {
-    //     LH_DEBUG("LastHope chance failed");
-    //     return false;
-    // }
+    if (RANDOM_LONG(1, 100) > LAST_HOPE_CHANCE)
+    {
+        LH_DEBUG("LastHope chance failed");
+        return false;
+    }
 
     // выбираем игрока
     int candidate = 0;
@@ -135,12 +199,12 @@ bool LastHope_TryRespawnPlayer(int last_hope_player_id)
     PlayerMethods::RoundRespawn(ent);
 
     ent->v.deadflag   = DEAD_NO;
-    ent->v.health     = 100;
+    ent->v.health     = 120.0f;
+    ent->v.armorvalue = 100.0f;
     ent->v.takedamage = DAMAGE_YES;
     ent->v.solid      = SOLID_SLIDEBOX;
     ent->v.movetype   = MOVETYPE_WALK;
     ent->v.flags     &= ~FL_ONGROUND;
-    ent->v.velocity   = Vector(0, 0, 0);
 
     void* privateData = ent->pvPrivateData;
 
@@ -162,8 +226,11 @@ bool LastHope_TryRespawnPlayer(int last_hope_player_id)
         reinterpret_cast<CBasePlayer*>(privateData),
         last_hope_player_id
     );
-
+    
     LH_DEBUG("[Respawn] RestoreSavedWeapon returned");
+
+    PlayerState& state = g_players[last_hope_player_id];
+    RestorePlayerOrigin(ent, state);
 
     ent->v.iuser1 = 0;
     ent->v.iuser2 = 0;

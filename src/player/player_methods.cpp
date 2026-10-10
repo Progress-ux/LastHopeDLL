@@ -11,8 +11,12 @@
 namespace 
 {
     constexpr std::size_t ROUND_RESPAWN_VTABLE_INDEX = 84;
-    constexpr uintptr_t GIVE_NAMED_ITEM_RVA = 0x14b040;
+
+#if defined (LH_PLUG_TO_REMOTE_SERVER)
+    constexpr std::uintptr_t GIVE_NAMED_ITEM_OFFSET = 0x13d7c0;
+#else
     constexpr std::uintptr_t GIVE_NAMED_ITEM_OFFSET = 0x13dc60;
+#endif
 
     using RoundRespawnFn  = void (*)(void*);
     using GiveNamedItemOrigFn = void* (*)(void* player, const char* classname);

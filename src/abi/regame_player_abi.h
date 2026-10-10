@@ -31,6 +31,7 @@ namespace regame
 constexpr int MAX_ITEM_TYPES = 6;
 constexpr int MAX_AMMO_SLOTS = 32;
 
+
     inline void* GetActiveItem(void* player)
     {
         if (!player) return nullptr;
@@ -115,5 +116,25 @@ constexpr int MAX_AMMO_SLOTS = 32;
         if (!weapon) return 0;
         return *reinterpret_cast<int*>(
             static_cast<std::byte*>(weapon) + CBasePlayerWeapon_m_iSecondaryAmmoType);
+    }
+    inline void* FindPlayerItem(void* player, int weaponId)
+    {
+        if (!player || weaponId <= 0)
+            return nullptr;
+        
+        for (int slot = 0; slot < MAX_ITEM_TYPES; ++slot)
+        {
+            void* item = GetSlotItem(player, slot);
+
+            int traversed = 0;
+            while (item && traversed++ < 32)
+            {
+                if (GetItemId(item) == weaponId)
+                    return item;
+                item = GetNextItem(item);
+            }
+        }
+
+        return nullptr;
     }
 }
