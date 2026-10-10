@@ -60,7 +60,7 @@ void LH_LogShutdown()
     }
 }
 
-void LH_Log(const char *level, const char *format, ...)
+void LH_Log(const char *level, const char* function, const char *format, ...)
 {
     char message[1024];
 
@@ -90,9 +90,10 @@ void LH_Log(const char *level, const char *format, ...)
     int lenght = snprintf(
         output,
         sizeof(output),
-        "[%s] [%s] %s\n",
+        "[%s] [%s] [%s] %s\n",
         timestamp,
         level,
+        function,
         message
     );
     

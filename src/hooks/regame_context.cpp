@@ -14,13 +14,13 @@ namespace ReGameContext
     {
         if (!api)
         {
-            LH_ERROR("[ReGameContext] Init: api == nullptr");
+            LH_ERROR("Init: api == nullptr");
             return false;
         }
 
         if (g_api)
         {
-            LH_WARN("[ReGameContext] Init: already initialized");
+            LH_WARN("Init: already initialized");
             return false;
         }
 
@@ -29,12 +29,12 @@ namespace ReGameContext
 
         if (!g_hookchains)
         {
-            LH_ERROR("[ReGameContext] Init: GetHookchains() returned nullptr");
+            LH_ERROR("Init: GetHookchains() returned nullptr");
             return false;
         }
 
         LH_INFO(
-            "[ReGameContext] Init: api=%p hookchains=%p version=%d.%d",
+            "Init: api=%p hookchains=%p version=%d.%d",
             static_cast<void*>(g_api),
             static_cast<void*>(g_hookchains),
             api->GetMajorVersion(),
@@ -48,7 +48,7 @@ namespace ReGameContext
     {
         g_api = nullptr;
         g_hookchains = nullptr;
-        LH_INFO("[ReGameContext] Reset");
+        LH_INFO("Reset");
     }
 
     bool isInitialize() { return g_api != nullptr && g_hookchains != nullptr; } 

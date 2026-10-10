@@ -92,7 +92,7 @@ void LastHope_PlayerPostThink(edict_t* pEntity)
         player.deathOrigin[2] = origin.z;
 
         LH_DEBUG(
-            "[PlayerPostThink] DeadState: id=%d name=\"%s\" origin=(%.1f %.1f %.1f)",
+            "DeadState: id=%d name=\"%s\" origin=(%.1f %.1f %.1f)",
             index,
             STRING(pEntity->v.netname),
             origin.x,

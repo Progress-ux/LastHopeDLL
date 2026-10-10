@@ -1,5 +1,8 @@
 #pragma once
 
+class CBasePlayer;
+struct entvars_s;
+
 namespace regame
 {
 
@@ -19,7 +22,7 @@ namespace regame
 	class IReGameHookRegistry_CBasePlayer_TraceAttack;
 	class IReGameHookRegistry_CBasePlayer_TakeDamage;
 	class IReGameHookRegistry_CBasePlayer_TakeHealth;
-	class IReGameHookRegistry_CBasePlayer_Killed;
+	// class IReGameHookRegistry_CBasePlayer_Killed;
 	class IReGameHookRegistry_CBasePlayer_AddPoints;
 	class IReGameHookRegistry_CBasePlayer_AddPointsToTeam;
 	class IReGameHookRegistry_CBasePlayer_AddPlayerItem;
@@ -200,6 +203,21 @@ namespace regame
 
     using IReGameHookRegistry_CSGameRules_RestartRound = 
         IHookChainRegistry<void>;
+
+    using IReGameHookRegistry_CBasePlayer_Killed =
+        IHookChainRegistry<
+            void,
+            CBasePlayer*,
+            entvars_s*,
+            int
+        >;
+    using CBasePlayer_KilledChain = 
+        IHookChain<
+            void,
+            CBasePlayer*,
+            entvars_s*,
+            int
+        >;
 
 	class IReGameHookchains
 	{

@@ -36,11 +36,11 @@ namespace
         
         if (!g_game_dll_path)
         {
-            LH_ERROR("[LoadReGameApi] GameDLL not found!");
+            LH_ERROR("GameDLL not found!");
             return nullptr;
         }
 
-        LH_DEBUG("[LoadReGameApi] GameDLL path: \"%s\"", g_game_dll_path);
+        LH_DEBUG("GameDLL path: \"%s\"", g_game_dll_path);
 
         void* handle = dlopen(
             g_game_dll_path,
@@ -50,7 +50,7 @@ namespace
         if (!handle)
         {
             LH_ERROR(
-                "[LoadReGameApi] Failed to get GameDLL handle: %s",
+                "Failed to get GameDLL handle: %s",
                 dlerror()
             );
             return nullptr;
@@ -66,13 +66,13 @@ namespace
         if (!factory)
         {
             LH_ERROR(
-                "[LoadReGameApi] Symbol \"CreateInterface\" not found!"
+                "Symbol \"CreateInterface\" not found!"
             );
             return nullptr;
         }
 
         LH_DEBUG(
-            "[LoadReGameApi] CreateInterface found: %p",
+            "CreateInterface found: %p",
             reinterpret_cast<void*>(factory)
         );
 
@@ -86,7 +86,7 @@ namespace
         if (!api)
         {
             LH_ERROR(
-                "[LoadReGameApi] CreateInterface returned nullptr! "
+                "CreateInterface returned nullptr! "
                 "returnCode=%d",
                 returnCode
             );
@@ -102,7 +102,7 @@ bool Initialize()
 {
     if (ReGameContext::isInitialize())
     {
-        LH_WARN("[Initialize] Already initialized");
+        LH_WARN("Already initialized");
         return true;
     }
 
@@ -134,6 +134,15 @@ bool Initialize()
         return false;
     }
 
+    if (!RegisterPlayerKilledHook())
+    {
+        UnregisterRestartRoundHook();
+        UnregisterCheckWinConditionsHook();
+        PlayerDeathThinkHook::Uninstall();
+        ReGameContext::Reset();
+        return false;
+    }
+
     return true;
 }
 
@@ -141,16 +150,17 @@ void Shutdown()
 {
     if (!ReGameContext::isInitialize())
     {
-        LH_DEBUG("[Shutdown] Already shutdown");
+        LH_DEBUG("Already shutdown");
         return;
     }
 
-    LH_DEBUG("[Shutdown] Removing ReGameDLL hooks");
+    LH_DEBUG("Removing ReGameDLL hooks");
 
+    UnregisterPlayerKilledHook();
     UnregisterRestartRoundHook();
     UnregisterCheckWinConditionsHook();
 
     ReGameContext::Reset();
 
-    LH_INFO("[Shutdown] ReGameDLL shutdown complete");
+    LH_INFO("ReGameDLL shutdown complete");
 }

@@ -10,6 +10,8 @@
 
 #include "util/logger.h"
 
+State g_state;
+
 namespace
 {
 #if defined (LH_PLUG_TO_REMOTE_SERVER)
@@ -19,18 +21,6 @@ namespace
     constexpr uintptr_t PLAYER_DEATH_THINK_RVA = 0x001415f0;
     constexpr uintptr_t GOT_RVA = 0x002D8FF4;
 #endif
-    /*
-     * Current function prologue:
-     *
-     *   1415f0: e8 17 2d f9 ff
-     *   1415f5: 05 ff 79 19 00
-     *
-     * The first instruction calls __x86.get_pc_thunk.ax,
-     * and the second instruction calculates the GOT address.
-     *
-     * We replace exactly these 10 bytes.
-     */
-    constexpr std::size_t PATCH_SIZE = 10;
 
     /*
      * After the two stolen instructions execution continues here:
@@ -44,20 +34,6 @@ namespace
     using PlayerDeathThinkHandler =
         bool (*)(void* player);
 
-    struct State
-    {
-        uintptr_t cs_base = 0;
-        uintptr_t target = 0;
-
-        void* trampoline = nullptr;
-        std::size_t trampoline_size = 0;
-
-        unsigned char original[PATCH_SIZE] = {};
-
-        bool installed = false;
-    };
-
-    State g_state;
 
     uintptr_t GetModuleBase()
     {
@@ -288,7 +264,7 @@ namespace
     void __attribute__((force_align_arg_pointer))
     PlayerDeathThink_Detour(void* player)
     {
-        LH_DEBUG("[PlayerDeathThink] DETOUR player=%p", player);
+        LH_DEBUG("DETOUR player=%p", player);
 
         if (g_last_hope_pending && g_last_hope_player_id > 0)
         {
@@ -316,7 +292,7 @@ namespace
             ))
         {
             LH_ERROR(
-                "[PlayerDeathThink] mprotect(RWX) failed"
+                "mprotect(RWX) failed"
             );
 
             return false;
@@ -365,7 +341,7 @@ namespace
             ))
         {
             LH_ERROR(
-                "[PlayerDeathThink] mprotect(RX) failed"
+                "mprotect(RX) failed"
             );
 
             return false;
@@ -386,7 +362,7 @@ namespace
             ))
         {
             LH_ERROR(
-                "[PlayerDeathThink] cannot make target writable"
+                "cannot make target writable"
             );
 
             return false;
@@ -411,7 +387,7 @@ namespace
             ))
         {
             LH_ERROR(
-                "[PlayerDeathThink] cannot restore RX permissions"
+                "cannot restore RX permissions"
             );
 
             return false;
@@ -428,7 +404,7 @@ namespace PlayerDeathThinkHook
         if (g_state.installed)
         {
             LH_WARN(
-                "[PlayerDeathThink] Already installed"
+                "Already installed"
             );
 
             return true;
@@ -442,7 +418,7 @@ namespace PlayerDeathThinkHook
         if (!g_state.cs_base)
         {
             LH_ERROR(
-                "[PlayerDeathThink] Cannot find cs.so"
+                "Cannot find cs.so"
             );
 
             return false;
@@ -453,12 +429,12 @@ namespace PlayerDeathThinkHook
             PLAYER_DEATH_THINK_RVA;
 
         LH_DEBUG(
-            "[PlayerDeathThink] cs.so base: %p",
+            "cs.so base: %p",
             reinterpret_cast<void*>(g_state.cs_base)
         );
 
         LH_DEBUG(
-            "[PlayerDeathThink] target: %p",
+            "target: %p",
             reinterpret_cast<void*>(g_state.target)
         );
 
@@ -472,7 +448,7 @@ namespace PlayerDeathThinkHook
         );
 
         LH_DEBUG(
-            "[PlayerDeathThink] Original bytes: "
+            "Original bytes: "
             "%02X %02X %02X %02X %02X "
             "%02X %02X %02X %02X %02X",
             g_state.original[0],
@@ -496,11 +472,11 @@ namespace PlayerDeathThinkHook
             g_state.original[5] != 0x05)
         {
             LH_ERROR(
-                "[PlayerDeathThink] Unexpected function prologue"
+                "Unexpected function prologue"
             );
 
             LH_ERROR(
-                "[PlayerDeathThink] Expected "
+                "Expected "
                 "E8 ........ 05 ........"
             );
 
@@ -510,7 +486,7 @@ namespace PlayerDeathThinkHook
         if (!CreateTrampoline())
         {
             LH_ERROR(
-                "[PlayerDeathThink] Cannot create trampoline"
+                "Cannot create trampoline"
             );
 
             return false;
@@ -519,7 +495,7 @@ namespace PlayerDeathThinkHook
         if (!Patch())
         {
             LH_ERROR(
-                "[PlayerDeathThink] Cannot patch target"
+                "Cannot patch target"
             );
 
             DestroyTrampoline();
@@ -530,11 +506,11 @@ namespace PlayerDeathThinkHook
         g_state.installed = true;
 
         LH_DEBUG(
-            "[PlayerDeathThink] Hook installed"
+            "Hook installed"
         );
 
         LH_DEBUG(
-            "[PlayerDeathThink] trampoline: %p",
+            "trampoline: %p",
             g_state.trampoline
         );
 
@@ -561,7 +537,7 @@ namespace PlayerDeathThinkHook
             );
 
             LH_DEBUG(
-                "[PlayerDeathThink] Hook removed"
+                "Hook removed"
             );
         }
     }

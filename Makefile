@@ -51,7 +51,8 @@ GAME_RULES_SOURCE = \
 
 UTIL_SOURCE = \
 	src/util/sdk_util.cpp \
-	src/util/logger.cpp
+	src/util/logger.cpp \
+	src/util/weapon.cpp
 
 CORE_SOURCE = \
 	src/core/last_hope.cpp

@@ -2,16 +2,67 @@
 
 #include <dllapi.h>
 
+#include "const.h"
 #include "game_rules/last_hope_rules.h"
 #include "player/player_methods.h"
+#include "player/player_state.h"
 #include "player/player_team.h"
 #include "util/logger.h"
 #include "sdk_util.h"
+#include "util/weapon.h"
 
 bool can_last_hope_use = false;
 int  g_last_hope_player_id = -1;
 bool g_last_hope_pending = false;
 int  LAST_HOPE_CHANCE = 20;
+
+namespace 
+{
+    void RestoreSavedWeapon(CBasePlayer* player, int playerId)
+    {
+        if (!player || playerId < 1 || playerId > MAX_PLAYERS)
+            return;
+
+        auto& inventory = g_players[playerId].inventory;
+
+        if (!inventory.valid)
+        {
+            return;
+        }
+
+        for(int i = 0; i < inventory.weaponCount; ++i)
+        {
+            const SavedWeapon& saved = inventory.weapons[i];
+
+            if (!saved.valid)
+                continue;
+
+            const char* classname = WeaponIdToClassname(saved.id);
+
+            if (!classname)
+            {
+                continue;
+            }
+
+            LH_DEBUG(
+                "before GiveNamedItem: player=%p id=%d classname=%s",
+                player, saved.id, classname
+            );
+
+            auto* item = PlayerMethods::GiveNamedItem(player, classname);
+
+            LH_DEBUG(
+                "after GiveNamedItem: item=%p",
+                item
+            );
+
+            LH_DEBUG(
+                "player=%d weapon=%s item=%p",
+                playerId, classname, item
+            );
+        }
+    }
+}
 
 bool LastHope_CheckWinCondition(TeamStatus& t, TeamStatus& ct)
 {
@@ -33,11 +84,11 @@ bool LastHope_CheckWinCondition(TeamStatus& t, TeamStatus& ct)
         return false;
     }
 
-    if (RANDOM_LONG(1, 100) > LAST_HOPE_CHANCE)
-    {
-        LH_DEBUG("LastHope chance failed");
-        return false;
-    }
+    // if (RANDOM_LONG(1, 100) > LAST_HOPE_CHANCE)
+    // {
+    //     LH_DEBUG("LastHope chance failed");
+    //     return false;
+    // }
 
     // выбираем игрока
     int candidate = 0;
@@ -78,7 +129,7 @@ bool LastHope_TryRespawnPlayer(int last_hope_player_id)
     if (!ent || ent->free)
         return false;
 
-    LH_DEBUG("[LastHope] [Respawn] Candidate: name=\"%s\" id=%d",
+    LH_DEBUG("Candidate: name=\"%s\" id=%d",
             STRING(ent->v.netname), last_hope_player_id);
 
     PlayerMethods::RoundRespawn(ent);
@@ -90,7 +141,29 @@ bool LastHope_TryRespawnPlayer(int last_hope_player_id)
     ent->v.movetype   = MOVETYPE_WALK;
     ent->v.flags     &= ~FL_ONGROUND;
     ent->v.velocity   = Vector(0, 0, 0);
-    ent->v.weapons    = 0;
+
+    void* privateData = ent->pvPrivateData;
+
+    LH_DEBUG(
+        "[Respawn] ent=%p pvPrivateData=%p playerId=%d inventoryValid=%d",
+        ent,
+        privateData,
+        last_hope_player_id,
+        g_players[last_hope_player_id].inventory.valid
+    );
+
+    if (!privateData)
+    {
+        LH_DEBUG("[Respawn] pvPrivateData is null");
+        return false;
+    }
+
+    RestoreSavedWeapon(
+        reinterpret_cast<CBasePlayer*>(privateData),
+        last_hope_player_id
+    );
+
+    LH_DEBUG("[Respawn] RestoreSavedWeapon returned");
 
     ent->v.iuser1 = 0;
     ent->v.iuser2 = 0;
